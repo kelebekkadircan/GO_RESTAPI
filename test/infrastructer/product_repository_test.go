@@ -148,3 +148,95 @@ func TestGetAllProductsByStore(t *testing.T) {
 
 	clear(ctx, dbPool)
 }
+
+func TestAddProductRepository(t *testing.T) {
+
+	expectedProducts := []domain.Product{
+		{
+			Id:       1,
+			Name:     "AirFryer",
+			Price:    3000.0,
+			Discount: 22.0,
+			Store:    "ABC TECH",
+		},
+	}
+
+	newProduct := domain.Product{
+		Name:     "AirFryer",
+		Price:    3000.0,
+		Discount: 22.0,
+		Store:    "ABC TECH",
+	}
+
+	t.Run("AddProduct", func(t *testing.T) {
+		productRepository.AddProduct(newProduct)
+		actualProducts := productRepository.GetAllProducts()
+		assert.Equal(t, 1, len(actualProducts))
+		assert.Equal(t, expectedProducts, actualProducts)
+	})
+
+	clear(ctx, dbPool)
+}
+
+func TestGetProductById(t *testing.T) {
+
+	setup(ctx, dbPool)
+
+	t.Run("GetProductById", func(t *testing.T) {
+		actualProduct, _ := productRepository.GetById(1)
+		assert.Equal(t, domain.Product{
+			Id:       1,
+			Name:     "AirFryer",
+			Price:    3000.0,
+			Discount: 22.0,
+			Store:    "ABC TECH",
+		}, actualProduct)
+	})
+
+	clear(ctx, dbPool)
+}
+
+func TestDeleteById(t *testing.T) {
+
+	setup(ctx, dbPool)
+
+	t.Run("GetProductById", func(t *testing.T) {
+		productRepository.DeleteById(1)
+		actualProducts := productRepository.GetAllProducts()
+		assert.Equal(t, 3, len(actualProducts))
+	})
+
+	clear(ctx, dbPool)
+}
+
+func TestUpdatePrice(t *testing.T) {
+
+	setup(ctx, dbPool)
+
+	t.Run("UpdatePrice", func(t *testing.T) {
+		productBeforeUpdate, _ := productRepository.GetById(1)
+		assert.Equal(t, domain.Product{
+			Id:       1,
+			Name:     "AirFryer",
+			Price:    3000.0,
+			Discount: 22.0,
+			Store:    "ABC TECH",
+		}, productBeforeUpdate)
+		err := productRepository.UpdatePrice(1, 4000.0)
+		if err != nil {
+			fmt.Println("Error while updating price")
+		}
+		productAfterUpdate, _ := productRepository.GetById(1)
+		assert.Equal(t, domain.Product{
+			Id:       1,
+			Name:     "AirFryer",
+			Price:    4000.0,
+			Discount: 22.0,
+			Store:    "ABC TECH",
+		}, productAfterUpdate)
+
+	})
+
+	clear(ctx, dbPool)
+
+}
