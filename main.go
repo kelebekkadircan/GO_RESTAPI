@@ -1,12 +1,32 @@
 package main
 
 import (
+	"context"
+	"productapp/common/app"
+	"productapp/common/postgresql"
+	"productapp/controller"
+	"productapp/persistence"
+	"productapp/service"
+
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	
- 	e := echo.New()
-	e.Start("localhost:8080" )
+
+	ctx := context.Background()
+	e := echo.New()
+
+	configurationManager := app.NewConfigurationManager()
+	dbPool := postgresql.GetConnectionPool(ctx, configurationManager.PostgreSqlConfig)
+
+	productRepository := persistence.NewProductRepository(dbPool)
+
+	productService := service.NewProductService(productRepository)
+
+	productController := controller.NewProductController(productService)
+
+	productController.RegisterRoutes(e)
+
+	e.Start("localhost:8080")
 
 }
